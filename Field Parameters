@@ -33,4 +33,4 @@ VAR _pfTables =
         "Field Parameter Name", [Name]
     )
 RETURN
-    _fpColumns
+    _pfTables
