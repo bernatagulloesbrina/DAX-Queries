@@ -1,12 +1,36 @@
 EVALUATE
-VAR _fpColumns = SELECTCOLUMNS( FILTER( INFO.EXTENDEDPROPERTIES(), [Name] = "ParameterMetadata" && [Value] = "{""version"":3,""kind"":2}" ), "ObjectID", [ObjectID] )
-
-VAR _allColumns = SELECTCOLUMNS( INFO.COLUMNS(), "ObjectID",[ID], "TableID", [TableID] )
-
-VAR _fpColumnTableId = NATURALINNERJOIN(_fpColumns,_allColumns)
-
-VAR _allTables = SELECTCOLUMNS(INFO.TABLES(),"TableID", [ID],"Name", [Name])
-
-VAR _pfTables = SELECTCOLUMNS( NATURALINNERJOIN( _fpColumnTableId, _allTables ), "Field Parameter Name", [Name] )
-
-RETURN _pfTables
+VAR _fpColumns =
+    SELECTCOLUMNS(
+        FILTER(
+            INFO.EXTENDEDPROPERTIES( ),
+            VAR _value = [Value]
+            VAR _valueNoLineBreaks =
+                SUBSTITUTE( _value, UNICHAR( 10 ), "" )
+            VAR _valueNoSpaces = SUBSTITUTE( _valueNoLineBreaks, " ", "" )
+            RETURN
+                [Name] = "ParameterMetadata"
+                    && _valueNoSpaces = "{""version"":3,""kind"":2}"
+        ),
+        "ObjectID", [ObjectID]
+    )
+VAR _allColumns =
+    SELECTCOLUMNS(
+        INFO.COLUMNS( ),
+        "ObjectID", [ID],
+        "TableID", [TableID]
+    )
+VAR _fpColumnTableId =
+    NATURALINNERJOIN( _fpColumns, _allColumns )
+VAR _allTables =
+    SELECTCOLUMNS(
+        INFO.TABLES( ),
+        "TableID", [ID],
+        "Name", [Name]
+    )
+VAR _pfTables =
+    SELECTCOLUMNS(
+        NATURALINNERJOIN( _fpColumnTableId, _allTables ),
+        "Field Parameter Name", [Name]
+    )
+RETURN
+    _fpColumns
